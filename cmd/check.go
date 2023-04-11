@@ -26,11 +26,12 @@ var checkCmd = &cobra.Command{
 	Short: "Verify if host is reachable",
 	Long:  `verify if host resp is OK`,
 	Run: func(cmd *cobra.Command, args []string) {
-		host := targetHost.hostname
-		port := targetHost.hostport
+		host, _ := cmd.Flags().GetString("hostname")
+		port, _ := cmd.Flags().GetInt("hostport")
 		log.Print(bannerLines)
 		log.Print(appName)
 		log.Print(bannerLines)
+		fmt.Print("\n\n\n", host, "\n", port, "\n\n\n")
 		url := host + ":" + strconv.Itoa(port)
 		log.Print("Testing the url: ", url)
 		r, e := http.Get(url)
