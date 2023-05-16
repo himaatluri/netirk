@@ -1,5 +1,5 @@
 # Netirk
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk?ref=badge_shield) [![Go Report Card](https://goreportcard.com/badge/github.com/himasagaratluri/netirk)](https://goreportcard.com/report/github.com/himasagaratluri/netirk)
 
 A Cli that can run some network analysis.
 
