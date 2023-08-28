@@ -3,6 +3,9 @@
 
 A Cli that can run some network analysis.
 
+## Reference
+https://cloud.google.com/go/docs/reference/cloud.google.com/go/networkmanagement/latest/apiv1
+
 ## Instructions
 
 ### Usage
