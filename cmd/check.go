@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/himasagaratluri/netirk/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 
@@ -61,13 +61,25 @@ var checkCmd = &cobra.Command{
 		host, _ := cmd.Flags().GetString("target")
 		hostIp, _ := cmd.Flags().GetString("ip")
 		port, _ := cmd.Flags().GetInt("port")
-		helpers.PrintAppBanner()
-		if host == "" && !strings.Contains(hostIp, "https") && !strings.Contains(host, "http") {
-			TargetUrl = hostIp + ":" + strconv.Itoa(port)
-			CheckTCPConnection(TargetUrl)
-		} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
-			TargetUrl = host + ":" + strconv.Itoa(port)
-			CheckHttpConnection(TargetUrl)
+		sslValidate, _ := cmd.Flags().GetBool("verify-ssl")
+		if sslValidate {
+			fmt.Println("Getting server certs...")
+			connect, err := tls.Dial("tcp", host+":443", nil)
+			if err != nil {
+				log.Panic("No SSL support for server:\n" + err.Error())
+			}
+
+			for n, cer := range connect.ConnectionState().PeerCertificates {
+				fmt.Println("\ncert: ", n, "\n", "- Issuer: ", &cer.Issuer, "\n- CA: ", cer.IsCA, "\n- DNSNames: \n", &cer.DNSNames, "\n- Expiration: \n", cer.NotAfter.Format(time.RFC850))
+			}
+		} else {
+			if host == "" && !strings.Contains(hostIp, "https") && !strings.Contains(host, "http") {
+				TargetUrl = hostIp + ":" + strconv.Itoa(port)
+				CheckTCPConnection(TargetUrl)
+			} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
+				TargetUrl = host + ":" + strconv.Itoa(port)
+				CheckHttpConnection(TargetUrl)
+			}
 		}
 	},
 }
@@ -77,4 +89,5 @@ func init() {
 	checkCmd.Flags().String("target", "", "host name like: google.com")
 	checkCmd.Flags().String("ip", "", "IP address of the host like: 127.0.0.1")
 	checkCmd.Flags().Int("port", 443, "port number to test: 443")
+	checkCmd.Flags().Bool("verify-ssl", false, "Print server certs")
 }
