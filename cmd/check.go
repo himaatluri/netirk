@@ -11,13 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/himasagaratluri/netirk/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 
-const appName string = "| Netirk |"
-
 var TargetUrl string
-var bannerLines = strings.Repeat("-", len(appName))
 
 func CheckTCPConnection(TargetUrl string) {
 	log.Print("Testing the url: ", TargetUrl)
@@ -60,13 +58,10 @@ var checkCmd = &cobra.Command{
 	Short: "Verify if host is reachable",
 	Long:  `verify if host resp is OK`,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, _ := cmd.Flags().GetString("hostname")
-		hostIp, _ := cmd.Flags().GetString("host-ip")
-		port, _ := cmd.Flags().GetInt("hostport")
-		log.Print(bannerLines)
-		log.Print(appName)
-		log.Print(bannerLines)
-
+		host, _ := cmd.Flags().GetString("target")
+		hostIp, _ := cmd.Flags().GetString("ip")
+		port, _ := cmd.Flags().GetInt("port")
+		helpers.PrintAppBanner()
 		if host == "" && !strings.Contains(hostIp, "https") && !strings.Contains(host, "http") {
 			TargetUrl = hostIp + ":" + strconv.Itoa(port)
 			CheckTCPConnection(TargetUrl)
@@ -79,7 +74,7 @@ var checkCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
-	checkCmd.Flags().String("hostname", "", "host name like: google.com")
-	checkCmd.Flags().String("host-ip", "", "IP address of the host like: 127.0.0.1")
-	checkCmd.Flags().Int("hostport", 443, "port number to test: 443")
+	checkCmd.Flags().String("target", "", "host name like: google.com")
+	checkCmd.Flags().String("ip", "", "IP address of the host like: 127.0.0.1")
+	checkCmd.Flags().Int("port", 443, "port number to test: 443")
 }

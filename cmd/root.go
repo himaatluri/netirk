@@ -7,17 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type TargetSystem struct {
-	hostname string
-	hostport int
-}
-
-var targetHost TargetSystem
-
 var rootCmd = &cobra.Command{
 	Use:   "netirk",
 	Short: "Netirk is a network testing cli",
-	Long:  `A quick test related to service availability`,
+	Long: `A portable network utility to check system reachability,
+this utility can also be used to run a small http server when figuring out how to deploy a small
+http server in a dynamic network landscape such as cloud platforms.`,
 }
 
 func Execute() {
