@@ -69,11 +69,11 @@ var checkCmd = &cobra.Command{
 				log.Panic("No SSL support for server:\n" + err.Error())
 			}
 
-			for n, cer := range connect.ConnectionState().PeerCertificates {
-				fmt.Println("\ncert: ", n, "\n", "- Issuer: ", &cer.Issuer, "\n- CA: ", cer.IsCA, "\n- DNSNames: \n", &cer.DNSNames, "\n- Expiration: \n", cer.NotAfter.Format(time.RFC850))
+			for i, cer := range connect.ConnectionState().PeerCertificates {
+				fmt.Println("\ncert:", i, "\n- Issuer: ", &cer.Issuer, "\n- CA: ", cer.IsCA, "\n- DNSNames: \n", &cer.DNSNames, "\n- Expiration: \n", cer.NotAfter.Format(time.RFC850))
 			}
 		} else {
-			if host == "" && !strings.Contains(hostIp, "https") && !strings.Contains(host, "http") {
+			if hostIp == "" && !strings.Contains(host, "http") {
 				TargetUrl = hostIp + ":" + strconv.Itoa(port)
 				CheckTCPConnection(TargetUrl)
 			} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
@@ -86,8 +86,8 @@ var checkCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
-	checkCmd.Flags().String("target", "", "host name like: google.com")
-	checkCmd.Flags().String("ip", "", "IP address of the host like: 127.0.0.1")
+	checkCmd.Flags().String("target", "google.com", "host name like: google.com")
+	checkCmd.Flags().String("ip", "0.0.0.0", "IP address of the host like: 127.0.0.1")
 	checkCmd.Flags().Int("port", 443, "port number to test: 443")
 	checkCmd.Flags().Bool("verify-ssl", false, "Print server certs")
 }
