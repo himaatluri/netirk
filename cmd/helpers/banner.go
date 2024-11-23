@@ -2,20 +2,13 @@ package helpers
 
 import (
 	"fmt"
-	"log"
-	"strings"
 )
 
-const AppName string = "| Netirk |"
-
-var BannerLines = strings.Repeat("-", len(AppName))
-
-func PrintAppBanner() {
-	log.Print(BannerLines)
-	log.Print(AppName)
-	log.Print(BannerLines)
-}
+const AppName string = `| \ | | ___| |_(_)_ __| | __
+|  \| |/ _ \ __| | '__| |/ /
+| |\  |  __/ |_| | |  |   < 
+|_| \_|\___|\__|_|_|  |_|\_\`
 
 func GreetBanner() {
-	fmt.Print("\n", BannerLines, "\n", AppName, "\n", BannerLines, "\n")
+	fmt.Print("\n", AppName, "\n\n")
 }

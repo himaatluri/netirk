@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/himasagaratluri/netirk/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,6 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run local server for quick testing",
 	Run: func(cmd *cobra.Command, args []string) {
-		helpers.PrintAppBanner()
 		port, _ := cmd.Flags().GetInt("port")
 		fmt.Printf("Starting a simple http server on port, %v", port)
 		portDef := ":" + strconv.Itoa(port)
