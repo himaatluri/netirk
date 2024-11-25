@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"net"
@@ -52,6 +54,32 @@ func CheckHttpConnection(TargetUrl string) {
 	}
 }
 
+type serverCertificateData struct {
+	IsCA           bool
+	Issuer         string
+	DNSNames       []string
+	ExpirationTime string
+	PublicKey      string
+}
+
+func parseCertificateData(certificateData *x509.Certificate) serverCertificateData {
+
+	pemFormat := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certificateData.Raw,
+	})
+
+	s := serverCertificateData{
+		IsCA:           certificateData.IsCA,
+		DNSNames:       certificateData.DNSNames,
+		Issuer:         certificateData.Issuer.CommonName,
+		ExpirationTime: certificateData.NotAfter.Format(time.RFC850),
+		PublicKey:      string(pemFormat),
+	}
+
+	return s
+}
+
 // addCmd represents the add command
 var checkCmd = &cobra.Command{
 	Use:   "check",
@@ -65,15 +93,25 @@ var checkCmd = &cobra.Command{
 		if sslValidate {
 			fmt.Println("Getting server certs...")
 			connect, err := tls.Dial("tcp", host+":443", nil)
+
 			if err != nil {
 				log.Panic("No SSL support for server:\n" + err.Error())
 			}
 
-			for n, cer := range connect.ConnectionState().PeerCertificates {
-				fmt.Println("\ncert: ", n, "\n", "- Issuer: ", &cer.Issuer, "\n- CA: ", cer.IsCA, "\n- DNSNames: \n", &cer.DNSNames, "\n- Expiration: \n", cer.NotAfter.Format(time.RFC850))
+			defer connect.Close()
+
+			for i, cer := range connect.ConnectionState().PeerCertificates {
+				certData := parseCertificateData(cer)
+				fmt.Printf(`
+➥ Cert: %d 
+ ￫ CA: %t
+ ￫ Issuer: %s
+ ￫ Expiry: %s
+ ￫ PublicKey: 
+   %s`, i, certData.IsCA, certData.Issuer, certData.ExpirationTime, certData.PublicKey)
 			}
 		} else {
-			if host == "" && !strings.Contains(hostIp, "https") && !strings.Contains(host, "http") {
+			if hostIp == "" && !strings.Contains(host, "http") {
 				TargetUrl = hostIp + ":" + strconv.Itoa(port)
 				CheckTCPConnection(TargetUrl)
 			} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
@@ -86,8 +124,8 @@ var checkCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
-	checkCmd.Flags().String("target", "", "host name like: google.com")
-	checkCmd.Flags().String("ip", "", "IP address of the host like: 127.0.0.1")
+	checkCmd.Flags().String("target", "google.com", "host name like: google.com")
+	checkCmd.Flags().String("ip", "0.0.0.0", "IP address of the host like: 127.0.0.1")
 	checkCmd.Flags().Int("port", 443, "port number to test: 443")
 	checkCmd.Flags().Bool("verify-ssl", false, "Print server certs")
 }

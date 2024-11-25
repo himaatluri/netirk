@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	_ "embed"
 )
 
 func init() {
@@ -11,10 +12,13 @@ func init() {
 	versionCmd.Flags().String("short", "", "")
 }
 
+//go:embed version
+var version []byte
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of Netirk CLI",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Netirk static network tester v0.1")
+		fmt.Println(string(version))
 	},
 }
