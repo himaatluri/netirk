@@ -1,4 +1,5 @@
 # Netirk
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk?ref=badge_shield) [![Go Report Card](https://goreportcard.com/badge/github.com/himasagaratluri/netirk)](https://goreportcard.com/report/github.com/himasagaratluri/netirk)
 
 ```(shell)
@@ -39,20 +40,77 @@ Flags:
 ### In action
 
 ```(shell)
-2023/04/05 23:35:10 ------
-2023/04/05 23:35:10 Netirk
-2023/04/05 23:35:10 ------
-2023/04/05 23:35:10 
-Testing the url:        https://google.com:443
-2023/04/05 23:35:11 Success, the endpoint is reachable!  
+➜  netirk git:(tls) ✗ ./netirk check --target google.com --verify-ssl
+               _    _        _    
+  _ __    ___ | |_ (_) _ __ | | __
+ | '_ \  / _ \| __|| || '__|| |/ /
+ | | | ||  __/| |_ | || |   |   < 
+ |_| |_| \___| \__||_||_|   |_|\_\
+                                  
+
+Getting server certs...
+
+➥ Cert: 0 
+ ￫ CA: false
+ ￫ Issuer: WR2
+ ￫ Expiry: Monday, 13-Jan-25 08:36:56 UTC
+ ￫ PublicKey: 
+   -----BEGIN CERTIFICATE-----
+   
 ```
 
-### Development
+### Trace
 
 ```(shell)
-go mod init github.com/himasagaratluri/netirk
+➜  netirk git:(tls) ✗ ./netirk trace --host https://amazon.com --port 8080
 
-go install github.com/spf13/cobra
+               _    _        _    
+  _ __    ___ | |_ (_) _ __ | | __
+ | '_ \  / _ \| __|| || '__|| |/ /
+ | | | ||  __/| |_ | || |   |   < 
+ |_| |_| \___| \__||_||_|   |_|\_\
+                                  
 
-cobra init --pkg-name netirk
+DNS Resolution done: 7.618718ms
+Connect Done: 26.686553ms
+Connect Done: 28.837579ms
+Connect Done: 28.027495ms
+Request failed: dial tcp 54.239.28.85:8080: connect: connection refused
+➜  netirk git:(tls) ✗ ./netirk trace --host https://amazon.com --port 443 
+
+               _    _        _    
+  _ __    ___ | |_ (_) _ __ | | __
+ | '_ \  / _ \| __|| || '__|| |/ /
+ | | | ||  __/| |_ | || |   |   < 
+ |_| |_| \___| \__||_||_|   |_|\_\
+                                  
+
+DNS Resolution done: 7.553307ms
+Connect Done: 27.578134ms
+TLS Handshake Done: 83.745488ms
+Time to first byte: 147.988115ms
+```
+
+### Server
+
+```(shell)
+➜  netirk git:(tls) ✗ curl localhost:8080/host
+hostname-prints/returned
+
+➜  netirk git:(tls) ✗ curl localhost:8080/health
+healthy          
+```
+
+```(shell)
+➜  netirk git:(tls) ✗ ./netirk server                                   
+               _    _        _ 
+  _ __    ___ | |_ (_) _ __ | | __
+ | '_ \  / _ \| __|| || '__|| |/ /
+ | | | ||  __/| |_ | || |   |   < 
+ |_| |_| \___| \__||_||_|   |_|\_\
+                                  
+
+Starting a simple http server on port:  8080
+2024/11/25 23:46:37 request:  GET /host
+2024/11/25 23:46:44 request:  GET /health
 ```
