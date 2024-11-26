@@ -1,7 +1,15 @@
 # Netirk
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhimasagaratluri%2Fnetirk?ref=badge_shield) [![Go Report Card](https://goreportcard.com/badge/github.com/himasagaratluri/netirk)](https://goreportcard.com/report/github.com/himasagaratluri/netirk)
 
-A Cli that can run some network analysis.
+```(shell)
+               _    _        _    
+  _ __    ___ | |_ (_) _ __ | | __
+ | '_ \  / _ \| __|| || '__|| |/ /
+ | | | ||  __/| |_ | || |   |   < 
+ |_| |_| \___| \__||_||_|   |_|\_\
+```
+
+A CLI that can run some network analysis.
 
 ## Reference
 https://cloud.google.com/go/docs/reference/cloud.google.com/go/networkmanagement/latest/apiv1
