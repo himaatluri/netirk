@@ -116,3 +116,12 @@ Starting a simple http server on port:  8080
 2024/11/25 23:46:37 request:  GET /host
 2024/11/25 23:46:44 request:  GET /health
 ```
+
+### Multiple targets
+
+Now you can supply list of targets in a `yaml` file
+[example](./examples/targets.yaml)
+
+```(shell)
+➜  netirk check --targets-file targets.yaml --verify-ssl
+```
