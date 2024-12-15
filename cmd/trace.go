@@ -20,7 +20,7 @@ func init() {
 
 var traceCmd = &cobra.Command{
 	Use:   "trace",
-	Short: "Run local server for quick testing",
+	Short: "Run network trace, provides metrics for DNS and initial client connection.",
 	Run: func(cmd *cobra.Command, args []string) {
 		serverPort, _ := cmd.Flags().GetInt("port")
 		serverAddr, _ := cmd.Flags().GetString("host")
