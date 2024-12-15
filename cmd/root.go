@@ -21,3 +21,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func init() {
+	rootCmd.Flags().StringP("output", "o", "", "Output to a special format like json.")
+}

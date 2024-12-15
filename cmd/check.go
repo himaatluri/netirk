@@ -19,23 +19,29 @@ import (
 var TargetUrl string
 var wg sync.WaitGroup
 
-func CheckTCPConnection(TargetUrl string) {
+func CheckTCPConnection(TargetUrl string) string {
 	log.Print("Testing the url: ", TargetUrl)
 	var dialer net.Dialer
+	// var tcpStatus string
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 
 	defer cancel()
 
 	conn, err := dialer.DialContext(ctx, "tcp", TargetUrl)
+
 	if err != nil {
 		log.Fatalf("Failed to dial: %v", err)
+		tcpStatus := "FAILED"
+		return tcpStatus
 	} else {
+		defer conn.Close()
 		log.Print("TCP success!")
+		tcpStatus := "SUCCESS"
+		return tcpStatus
 	}
-	defer conn.Close()
 }
 
-func CheckHttpConnection(TargetUrl string) {
+func CheckHttpConnection(TargetUrl string) int {
 	log.Print("Testing the url: ", TargetUrl)
 	r, e := http.Get(TargetUrl)
 
@@ -52,6 +58,8 @@ func CheckHttpConnection(TargetUrl string) {
 	} else {
 		log.Print(statusCode, "\n", "Raw response: \n\n", r)
 	}
+
+	return statusCode
 }
 
 func checkMain(host, hostIp string, port int, sslValidate bool) {
