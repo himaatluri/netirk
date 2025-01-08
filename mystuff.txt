@@ -1,0 +1,3 @@
+update the cli for better output
+
+while true; do mtr -F randomipspaces -TP 443 -o LDSRA -bwc 100 | tee -a outputs.txt; done
