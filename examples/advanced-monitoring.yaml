@@ -1,0 +1,86 @@
+# Advanced Netirk Monitoring Configuration
+# Comprehensive configuration with all available features
+
+targets:
+  # Web application with custom headers and SSL monitoring
+  - url: "https://api.example.com/health"
+    timeout: "15s"
+    interval: "30s"
+    expected_status: 200
+    ssl_check: true
+    headers:
+      Authorization: "Bearer your-api-token-here"
+      User-Agent: "Netirk Monitor v1.0"
+      Accept: "application/json"
+      X-Monitor-Source: "netirk"
+
+  # Microservice with different settings
+  - url: "https://service.example.com/status"
+    timeout: "10s"
+    interval: "60s"
+    expected_status: 200
+    ssl_check: true
+    headers:
+      X-API-Key: "your-api-key"
+
+  # External service monitoring
+  - url: "https://httpbin.org/delay/2"
+    timeout: "5s"
+    interval: "120s"
+    expected_status: 200
+
+  # SSL certificate monitoring (useful for certificate expiry tracking)
+  - url: "https://expired.badssl.com"
+    timeout: "10s"
+    interval: "300s"  # Check every 5 minutes
+    ssl_check: true
+    expected_status: 200
+
+  # Database connection monitoring
+  - url: "tcp://database.example.com:5432"
+    timeout: "3s"
+    interval: "60s"
+
+  # Redis connection monitoring
+  - url: "tcp://redis.example.com:6379"
+    timeout: "2s"
+    interval: "30s"
+
+  # DNS server monitoring
+  - url: "tcp://8.8.8.8:53"
+    timeout: "2s"
+    interval: "60s"
+
+# Alert configuration
+alert_config:
+  enabled: true
+  failure_threshold: 3       # Alert after 3 consecutive failures
+  ssl_warning_days: 30       # Warn when SSL cert expires within 30 days
+  ssl_critical_days: 7       # Critical alert when SSL cert expires within 7 days
+  
+  # Slack webhook for notifications
+  webhook_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+  
+  # Email notifications
+  email_recipients:
+    - "admin@example.com"
+    - "devops@example.com"
+    - "oncall@example.com"
+  
+  # Email server configuration
+  email_config:
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    username: "alerts@example.com"
+    password: "your-app-password"  # Use app-specific password for Gmail
+    from_address: "alerts@example.com"
+    from_name: "Netirk Network Monitor"
+    use_starttls: true
+    insecure_tls: false
+
+# Export configuration
+export_config:
+  auto_export: true
+  formats: ["json", "csv", "html"]
+  output_directory: "./monitoring-reports"
+  retention_days: 30

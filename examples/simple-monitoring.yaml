@@ -1,0 +1,17 @@
+# Simple Netirk Monitoring Configuration
+# Basic configuration for monitoring common web services
+
+targets:
+  # Simple HTTP targets with default settings
+  - url: "https://google.com"
+  - url: "https://github.com"
+  - url: "https://stackoverflow.com"
+  
+  # API endpoint with custom timeout
+  - url: "https://httpbin.org/status/200"
+    timeout: "10s"
+    expected_status: 200
+    
+  # Database connection check
+  - url: "tcp://8.8.8.8:53"
+    timeout: "5s"

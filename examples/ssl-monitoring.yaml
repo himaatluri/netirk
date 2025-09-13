@@ -1,0 +1,56 @@
+# SSL Certificate Monitoring Configuration
+# Specialized configuration for monitoring SSL certificate health and expiration
+
+targets:
+  # Production websites - monitor SSL certificates
+  - url: "https://example.com"
+    timeout: "10s"
+    interval: "3600s"  # Check every hour
+    ssl_check: true
+    expected_status: 200
+
+  - url: "https://api.example.com"
+    timeout: "10s"
+    interval: "3600s"
+    ssl_check: true
+    expected_status: 200
+
+  - url: "https://admin.example.com"
+    timeout: "10s"
+    interval: "3600s"
+    ssl_check: true
+    expected_status: 200
+
+  # Test various SSL scenarios
+  - url: "https://expired.badssl.com"
+    timeout: "10s"
+    interval: "3600s"
+    ssl_check: true
+    expected_status: 200
+
+  - url: "https://wrong.host.badssl.com"
+    timeout: "10s"
+    interval: "3600s"
+    ssl_check: true
+    expected_status: 200
+
+  - url: "https://self-signed.badssl.com"
+    timeout: "10s"
+    interval: "3600s"
+    ssl_check: true
+    expected_status: 200
+
+# SSL-focused alert configuration
+alert_config:
+  enabled: true
+  failure_threshold: 1       # Alert immediately for SSL issues
+  ssl_warning_days: 30       # 30-day warning for certificate expiration
+  ssl_critical_days: 7       # 7-day critical alert for certificate expiration
+  
+  # Webhook for SSL alerts
+  webhook_url: "https://hooks.slack.com/services/YOUR/SSL/WEBHOOK"
+  
+  # Email notifications for SSL team
+  email_recipients:
+    - "ssl-admin@example.com"
+    - "security@example.com"
