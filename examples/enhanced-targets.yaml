@@ -1,0 +1,41 @@
+targets:
+  - url: "https://httpbin.org/status/200"
+    timeout: "10s"
+    interval: "30s"
+    expected_status: 200
+    ssl_check: true
+  - url: "https://httpbin.org/delay/2"
+    timeout: "5s"
+    interval: "60s"
+    expected_status: 200
+    headers:
+      User-Agent: "Netirk Monitor v1.0"
+      Accept: "application/json"
+  - url: "tcp://8.8.8.8:53"
+    timeout: "3s"
+    interval: "30s"
+
+# Alert configuration
+alert_config:
+  enabled: true
+  failure_threshold: 3
+  ssl_warning_days: 30
+  ssl_critical_days: 7
+  
+  # Webhook notifications
+  webhook_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+  
+  # Email notifications
+  email_recipients:
+    - "admin@example.com"
+    - "devops@example.com"
+  
+  email_config:
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    username: "alerts@example.com"
+    password: "your-app-password"
+    from_address: "alerts@example.com"
+    from_name: "Netirk Network Monitor"
+    use_starttls: true
+    insecure_tls: false

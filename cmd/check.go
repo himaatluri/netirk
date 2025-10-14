@@ -2,40 +2,47 @@ package cmd
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/himasagaratluri/netirk/cmd/helpers"
 	"github.com/spf13/cobra"
 )
 
 var TargetUrl string
+var wg sync.WaitGroup
 
-func CheckTCPConnection(TargetUrl string) {
+func CheckTCPConnection(TargetUrl string) string {
 	log.Print("Testing the url: ", TargetUrl)
 	var dialer net.Dialer
+	// var tcpStatus string
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 
 	defer cancel()
 
 	conn, err := dialer.DialContext(ctx, "tcp", TargetUrl)
+
 	if err != nil {
 		log.Fatalf("Failed to dial: %v", err)
+		tcpStatus := "FAILED"
+		return tcpStatus
 	} else {
+		defer conn.Close()
 		log.Print("TCP success!")
+		tcpStatus := "SUCCESS"
+		return tcpStatus
 	}
-	defer conn.Close()
 }
 
-func CheckHttpConnection(TargetUrl string) {
+func CheckHttpConnection(TargetUrl string) int {
 	log.Print("Testing the url: ", TargetUrl)
 	r, e := http.Get(TargetUrl)
 
@@ -52,79 +59,70 @@ func CheckHttpConnection(TargetUrl string) {
 	} else {
 		log.Print(statusCode, "\n", "Raw response: \n\n", r)
 	}
+
+	return statusCode
 }
 
-type serverCertificateData struct {
-	IsCA           bool
-	Issuer         string
-	DNSNames       []string
-	ExpirationTime string
-	PublicKey      string
-}
-
-func parseCertificateData(certificateData *x509.Certificate) serverCertificateData {
-
-	pemFormat := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certificateData.Raw,
-	})
-
-	s := serverCertificateData{
-		IsCA:           certificateData.IsCA,
-		DNSNames:       certificateData.DNSNames,
-		Issuer:         certificateData.Issuer.CommonName,
-		ExpirationTime: certificateData.NotAfter.Format(time.RFC850),
-		PublicKey:      string(pemFormat),
+func checkMain(host, hostIp string, port int, sslValidate bool) {
+	defer wg.Done()
+	if sslValidate {
+		helpers.SslReportOutput(host)
+	} else {
+		if hostIp == "" && !strings.Contains(host, "http") {
+			TargetUrl = hostIp + ":" + strconv.Itoa(port)
+			CheckTCPConnection(TargetUrl)
+		} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
+			TargetUrl = host + ":" + strconv.Itoa(port)
+			CheckHttpConnection(TargetUrl)
+		}
 	}
-
-	return s
 }
 
-// addCmd represents the add command
 var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Verify if host is reachable",
 	Long:  `verify if host resp is OK`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Check global flags
+		verbose, _ := rootCmd.PersistentFlags().GetBool("verbose")
+		quiet, _ := rootCmd.PersistentFlags().GetBool("quiet")
+		
+		// Set log level based on verbose/quiet flags
+		if verbose {
+			log.SetFlags(log.LstdFlags | log.Lshortfile)
+		} else if quiet {
+			log.SetOutput(io.Discard)
+		}
+		
+		targetsFilePath, _ := cmd.Flags().GetString("targets-file")
+		hosts := helpers.ParseTargetFile(targetsFilePath)
 		host, _ := cmd.Flags().GetString("target")
 		hostIp, _ := cmd.Flags().GetString("ip")
 		port, _ := cmd.Flags().GetInt("port")
 		sslValidate, _ := cmd.Flags().GetBool("verify-ssl")
-		if sslValidate {
-			fmt.Println("Getting server certs...")
-			connect, err := tls.Dial("tcp", host+":443", nil)
+		hosts.Targets = append(hosts.Targets, host)
 
-			if err != nil {
-				log.Panic("No SSL support for server:\n" + err.Error())
+		for _, target := range hosts.Targets {
+			wg.Add(1)
+			// Convert interface{} to string for legacy compatibility
+			var hostStr string
+			if str, ok := target.(string); ok {
+				hostStr = str
+			} else {
+				// Skip non-string targets in legacy check command
+				wg.Done()
+				continue
 			}
-
-			defer connect.Close()
-
-			for i, cer := range connect.ConnectionState().PeerCertificates {
-				certData := parseCertificateData(cer)
-				fmt.Printf(`
-➥ Cert: %d 
- ￫ CA: %t
- ￫ Issuer: %s
- ￫ Expiry: %s
- ￫ PublicKey: 
-   %s`, i, certData.IsCA, certData.Issuer, certData.ExpirationTime, certData.PublicKey)
-			}
-		} else {
-			if hostIp == "" && !strings.Contains(host, "http") {
-				TargetUrl = hostIp + ":" + strconv.Itoa(port)
-				CheckTCPConnection(TargetUrl)
-			} else if hostIp == "" || strings.Contains(hostIp, "https") || strings.Contains(host, "http") {
-				TargetUrl = host + ":" + strconv.Itoa(port)
-				CheckHttpConnection(TargetUrl)
-			}
+			go checkMain(hostStr, hostIp, port, sslValidate)
 		}
+		wg.Wait()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
 	checkCmd.Flags().String("target", "google.com", "host name like: google.com")
+	checkCmd.Flags().String("targets-file", "", "Path to the yaml file that contains target hosts.")
 	checkCmd.Flags().String("ip", "0.0.0.0", "IP address of the host like: 127.0.0.1")
 	checkCmd.Flags().Int("port", 443, "port number to test: 443")
 	checkCmd.Flags().Bool("verify-ssl", false, "Print server certs")
